@@ -7,11 +7,18 @@
         <title>Regressiovisualisaatio</title>
     </head>
     <body>
+        <div class="navbar">
+        </div>
         <div class="container">
-            <div class="col-md-6">
-                <h1>PNS-regressio</h1>
-                <p>Kliksuttelemalla voit lisätä tai poistaa datapisteitä, regressiosuora liikkuu aineiston mukana. Lisäksi nuolinäppäimillä voit siirtää suoraa. Optimaalinen suora minimoi virheliöiden yhteenlasketun alan.</p>
-                <div id="pallo"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>PNS-regressio</h1>
+                    <p>Kliksuttelemalla voit lisätä tai poistaa datapisteitä, regressiosuora liikkuu aineiston mukana. Lisäksi nuolinäppäimillä voit siirtää suoraa. Optimaalinen suora minimoi virheliöiden yhteenlasketun alan.</p>
+                    <p>Analyyttinen ratkaisu erityisesti yksinkertaisen mallin (ts. y = ax + b) tapauksessa on helppo laskea, mutta tässä on harrastuksen vuoksi käytetty hyväksi konveksisuutta ja sovellettu jyrkimmmän laskun menetelmää Barzilai-Borwein-askelkoilla.</p>
+                </div>
+                <div class="col-md-6">
+                    <div id="pallo"></div>
+                </div>
             </div>
         </div>
         <script data-main="dist/main-built" src="scripts/require.js"></script>

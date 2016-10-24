@@ -25,6 +25,7 @@ define(["button","pallo"], function(button, pallo) {
                 selite: "Piirrä neliövirheet"
             }
         ];
+
         this.buttonHandler = new button.ButtonHandler(elementId, self.btns, self);
         this.pallovisu = new pallo.Pallo(elementId, this.data, "raha", "joku");
     }
@@ -32,6 +33,15 @@ define(["button","pallo"], function(button, pallo) {
         this.buttonHandler.draw();
         this.pallovisu.init();
     };  
+    
+    RegressioVisu.prototype.optimalButtonCallback = function() {
+        this.pallovisu.update(); 
+    };
+
+    RegressioVisu.prototype.emptyButtonCallback = function() {
+        this.pallovisu.empty();
+    }
+
     RegressioVisu.prototype.btnCallback = function(value, checked) {
         if (value == "squares") {
             if (!checked)

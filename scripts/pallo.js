@@ -6,7 +6,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
         this.data = data;
         this.filtered = data;
         this.elementId = elementId;
-        this.shouldDrawSquares = false;
+        this.shouldDrawSquares = true;
         this.modelDegree = 1;
         this.xAxisScale;
         this.yAxisScale;
@@ -79,14 +79,12 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
 
         self.xAxis = d3.svg.axis().scale(self.xAxisScale)
             .orient("bottom")
-            .ticks(5)
             .outerTickSize(0)
             .tickPadding(10)
             .innerTickSize(-self.svgObject.height);
 
         self.yAxis = d3.svg.axis().scale(self.yAxisScale)
             .orient("left")
-            .ticks(5)
             .tickPadding(10)
             .outerTickSize(0)
             .innerTickSize(-self.svgObject.width);
@@ -280,6 +278,11 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             }
             self.drawCircles();
             self.drawBottomLegend();
+        }
+
+        Pallo.prototype.empty = function() {
+            this.filtered = this.data;
+            this.update();
         }
 
         Pallo.prototype.cleanUp = function() {
