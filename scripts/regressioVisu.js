@@ -1,5 +1,5 @@
-define(["button","pallo"], function(button, pallo) {
-    var RegressioVisu = function(elementId) {
+define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, paramspacevis) {
+    var RegressioVisu = function(palloElementId, paramElementId) {
         var self = this;
         this.data = [
             {
@@ -26,20 +26,41 @@ define(["button","pallo"], function(button, pallo) {
             }
         ];
 
-        this.buttonHandler = new button.ButtonHandler(elementId, self.btns, self);
-        this.pallovisu = new pallo.Pallo(elementId, this.data, "raha", "joku");
+        this.xname = "raha";
+        this.yname = "joku";
+        this.modelDegree = 1;
+        this.filtered = this.data;
+        this.model = new lm.Ols(self.filtered, self.yname, self.xname, self.modelDegree);
+        this.buttonHandler = new button.ButtonHandler(palloElementId, self.btns, self);
+        this.pallovisu = new pallo.Pallo(palloElementId, "raha", "joku", this);
+        this.paramspaceVisu = new paramspacevis.ParamspaceVisu(paramElementId, this);
     }
     RegressioVisu.prototype.init = function() {
         this.buttonHandler.draw();
         this.pallovisu.init();
+        this.paramspaceVisu.init();
+        this.addKeyListener();
     };  
     
+    RegressioVisu.prototype.update = function() {
+        this.pallovisu.update();
+        this.paramspaceVisu.update();
+    }
+
     RegressioVisu.prototype.optimalButtonCallback = function() {
-        this.pallovisu.update(); 
+        this.updateModel();
+        this.update(); 
     };
 
     RegressioVisu.prototype.emptyButtonCallback = function() {
-        this.pallovisu.empty();
+        this.restoreData();
+        this.updateModel();
+        this.update(); 
+    }
+
+    RegressioVisu.prototype.updateModel = function() {
+        var self = this;
+        self.model = new lm.Ols(self.filtered, self.yname, self.xname, 1);
     }
 
     RegressioVisu.prototype.btnCallback = function(value, checked) {
@@ -50,6 +71,67 @@ define(["button","pallo"], function(button, pallo) {
                 this.pallovisu.addSquares();
         }
     }
+
+    RegressioVisu.prototype.prediction = function(x) {
+        return this.model.predict(x);
+    }
+
+    RegressioVisu.prototype.parameters = function() {
+        var vals = this.model.beta.values;
+        return {
+            b0: vals[0][0], 
+            b1: vals[1][0]
+        };
+    }
+
+    RegressioVisu.prototype.printModel = function() {
+        return this.model.toString();
+    }
+
+    RegressioVisu.prototype.printSS = function() {
+        return Math.round(1000*this.model.totalSumOfSquares())/1000;
+    }
+
+    RegressioVisu.prototype.numPrediction = function(x) {
+        return this.model.predictNumeric(x);
+    }
+    
+    RegressioVisu.prototype.getFiltered = function() {
+        return this.filtered;
+    }
+
+    RegressioVisu.prototype.restoreData = function() {
+        this.filtered = this.data;
+    }
+
+    RegressioVisu.prototype.addDatapoint = function(d) {
+        this.filtered = this.filtered.concat([d]);
+    }
+
+    RegressioVisu.prototype.removeDatapoint = function(i) {
+        self.filtered = self.filtered.slice(0,i).concat(self.filtered.slice(i+1,self.filtered.length));
+    }
+
+    RegressioVisu.prototype.addKeyListener = function() {
+        var self = this;
+        d3.select("body")
+            .on("keydown", function() {
+                if (self.modelDegree == 1) {
+                    var keycode = d3.event.keyCode;
+                    if (keycode === 87) {
+                        self.model.incrementBeta1(0.1);
+                    } else if (keycode === 83) {
+                        self.model.incrementBeta1(-0.1);
+                    } else if (keycode === 68) {
+                        self.model.incrementBeta0(0.1);
+                    } else if (keycode === 65) {
+                        self.model.incrementBeta0(-0.1);
+                    }
+                    self.update();
+                }
+            })
+    }
+
     return {
         RegressioVisu: RegressioVisu
     }

@@ -1,16 +1,13 @@
 define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
-    var Pallo = function(elementId, data, xname, yname) {
+    var Pallo = function(elementId, xname, yname, visu) {
         var self = this;
         this.xname = xname;
         this.yname = yname;
-        this.data = data;
-        this.filtered = data;
         this.elementId = elementId;
         this.shouldDrawSquares = true;
-        this.modelDegree = 1;
+        this.visu = visu;
         this.xAxisScale;
         this.yAxisScale;
-        this.model;
         this.svgObject;
         this.squares;
         this.circles;
@@ -24,43 +21,9 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
         this.bottomLegend;
     }
 
-    Pallo.prototype.updateDegree = function(degree) {
-        var self = this; 
-        self.modelDegree = degree;
-        self.update();
-    }
-
     Pallo.prototype.updateMappings = function() {
         var self = this;
-        self.updateModel();
-        self.updateAxisScales();
-    }
-
-    Pallo.prototype.updateModel = function() {
-        var self = this;
-        self.model = new lm.Ols(self.filtered, self.yname, self.xname, self.modelDegree);
-    }
-
-    Pallo.prototype.addKeyListener = function() {
-        var self = this;
-        d3.select("body")
-            .on("keydown", function() {
-                if (self.modelDegree == 1) {
-                    var keycode = d3.event.keyCode;
-                    if (keycode === 38) {
-                        self.model.incrementBeta1(0.1);
-                    } else if (keycode === 40) {
-                        self.model.incrementBeta1(-0.1);
-                    } else if (keycode === 37) {
-                        self.model.incrementBeta0(0.1);
-                    } else if (keycode === 39) {
-                        self.model.incrementBeta0(-0.1);
-                    }
-                    self.cleanUp();
-                    self.updateSvg();
-                    self.draw();
-                }
-            })
+        self.visu.updateModel();
     }
 
     Pallo.prototype.updateAxisScales = function() {
@@ -68,7 +31,6 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
         self.xAxisScale = d3.scale.linear()
             .domain([0, 1])
             .range([0, self.svgObject.width]);
-
         self.yAxisScale = d3.scale.linear()
             .domain([0, 1])
             .range([self.svgObject.height, 0]);
@@ -117,12 +79,13 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             .append("text")
             .attr("x", 0)
             .attr("y", self.svgObject.height + 40)
-            .text(function() { return "Regressiomalli " + self.model.toString() + ", neliösumma: " + Math.round(1000*self.model.totalSumOfSquares())/1000})
+            .text(function() { return "Regressiomalli " + self.visu.printModel() + ", neliösumma: " + self.visu.printSS()})
     }
 
     Pallo.prototype.setSvg = function() {
         var self = this;
         self.svgObject = graphics.getSvg(self.elementId);
+        self.updateAxisScales();
     }
 
     Pallo.prototype.updateSvg = function() {
@@ -147,7 +110,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
                 var newobs = {};
                 newobs[self.xname] = x;
                 newobs[self.yname] = y;
-                self.filtered = self.filtered.concat([newobs]);
+                self.visu.addDatapoint(newobs);
                 self.update();
             })
     }
@@ -165,27 +128,27 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             .append("g")
                 .attr("class","squares")
                 .selectAll("rect")
-                .data(self.filtered).enter()
+                .data(self.visu.getFiltered()).enter()
                 .append("rect")
                     .attr("x", function(d,i) {
-                        var dist = d[self.yname] - self.model.predict(d);
+                        var dist = d[self.yname] - self.visu.prediction(d);
                         if (dist > 0) 
                             return self.xAxisScale(d[self.xname] - dist);
                         return self.xAxisScale(d[self.xname]);
                     })
                     .attr("y", function(d) {
-                        var dist = d[self.yname] - self.model.predict(d);
+                        var dist = d[self.yname] - self.visu.prediction(d);
                         if (dist > 0) {
                             return self.yAxisScale(d[self.yname]);
                         }
-                        return self.yAxisScale(self.model.predict(d)); 
+                        return self.yAxisScale(self.visu.prediction(d)); 
                     })
                     .attr("width", function(d) {
-                        var dist = Math.abs(d[self.yname] - self.model.predict(d));
+                        var dist = Math.abs(d[self.yname] - self.visu.prediction(d));
                         return self.xAxisScale(dist);
                     })
                     .attr("height", function(d) {
-                        var dist = Math.abs(d[self.yname] - self.model.predict(d));
+                        var dist = Math.abs(d[self.yname] - self.visu.prediction(d));
                         return self.svgObject.height - self.yAxisScale(dist);
                     })
         }
@@ -204,7 +167,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             var predictions = xs.map(function(x) { 
                 return {
                     x: x, 
-                    y: self.model.predictNumeric(x)
+                    y: self.visu.numPrediction(x)
                 } 
             }).filter(function(d) {
                 return d.y < 1 && d.x < 1 && d.y > 0 && d.x > 0;
@@ -222,7 +185,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             self.circles = self.svgObject.svgContainer
                 .append("g").attr("class", "circles")
                 .selectAll("circle")
-                .data(self.filtered)
+                .data(self.visu.getFiltered())
 
             self.circles.exit().remove();
 
@@ -231,9 +194,9 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
                 .attr("cy", function(d){return self.yAxisScale(d[self.yname])} )
                 .attr("r", 5)
                 .on("click", function(d, i) {
-                    if (self.filtered.length == 2)
+                    if (self.visu.getFiltered().length == 2)
                         return;
-                    self.filtered = self.filtered.slice(0,i).concat(self.filtered.slice(i+1,self.filtered.length));
+                    self.visu.removeDatapoint(i);
                     self.update();
                 })
 
@@ -255,34 +218,26 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
         Pallo.prototype.update = function() {
             var self = this;
             self.updateSvg();
-            self.updateMappings();
             self.draw(); 
         }
 
         Pallo.prototype.init = function() {
             var self = this;
             self.setSvg();
-            self.updateMappings();
             self.draw();
-            self.addKeyListener();
         }
 
         Pallo.prototype.draw = function() {
             var self = this;
+            if (self.shouldDrawSquares) {
+                self.drawSquares();
+            }
             self.drawAxis();
             self.setDataUpdateRectangle();
             self.drawBty();
             self.drawRegressionLine();
-            if (self.shouldDrawSquares) {
-                self.drawSquares();
-            }
             self.drawCircles();
             self.drawBottomLegend();
-        }
-
-        Pallo.prototype.empty = function() {
-            this.filtered = this.data;
-            this.update();
         }
 
         Pallo.prototype.cleanUp = function() {
@@ -293,6 +248,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             }
             self.svgObject = {};
         }
+
     return {
         Pallo: Pallo
     };
