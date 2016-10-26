@@ -1,18 +1,19 @@
 define(["linalg", "optimize"], function(linalg, optimize) {
-    var Ols = function(data, yname, xname, degree) {
+    var Ols = function(data, yname, xname, degree, initial) {
         var self = this;
         self.data = data;
         self.yname = yname;
         self.xname = xname;
         self.degree = degree;
-        console.log(self.degree);
         var x = linalg.onedimensionalDataToRowMatrixWithPolyBasis(self.data, self.xname, self.degree);
         var y = new linalg.RowMatrix(self.data.map( function(d) { return [d[self.yname]] }));
-        var initial = new Array(self.degree+1);
-        for (i = 0; i <= self.degree; i++) {
-            initial[i] = [1];
-        };
-        initial = new linalg.RowMatrix(initial);
+        if (typeof initial === 'undefined') {
+            initial = new Array(self.degree+1);
+            for (i = 0; i <= self.degree; i++) {
+                initial[i] = [5];
+            };
+            initial = new linalg.RowMatrix(initial);
+        }
         self.derivative = function(beta) {
             var xtx = x.transpose().multiply(x)
             var constfactor = x.transpose().multiply(y).scale(-1)
@@ -22,7 +23,8 @@ define(["linalg", "optimize"], function(linalg, optimize) {
             var preds = x.multiply(beta).add(y.scale(-1))
             return (preds.transpose().multiply(preds)).values[0][0];
         }
-        self.beta = optimize.gradientDescent(self.target, self.derivative, initial, 300);
+        self.betaPath = optimize.gradientDescent(self.target, self.derivative, initial, 300);
+        self.beta = self.betaPath[self.betaPath.length-1];
     }
 
     Ols.prototype.predict = function(d) {

@@ -13,19 +13,19 @@ define([], function() {
     var gradientDescent = function(target, derivative, initial, maxIter) {
         var betak_0 = initial.copy();
         var betak_1 = betak_0.add(derivative(betak_0).scale(0.00001*(-1)));
+        var path = [betak_0, betak_1];
         var i = 0;
         var betas = "";
         while (i++ < maxIter) {
             var mu = stepsize(betak_0, betak_1, derivative);
             betak_0 = betak_1;
             betak_1 = betak_1.add(derivative(betak_1).scale(mu*(-1)));
+            path.push(betak_1);
             if (Math.abs(target(betak_0) - target(betak_1)) < 0.00001) {
-                console.log("took " + i + " iterations")
-                return betak_1;
+                return path;
             }
         } 
-        console.log("took " + i + " iterations")
-        return betak_1;
+        return path;
     } 
     return {
         gradientDescent: gradientDescent

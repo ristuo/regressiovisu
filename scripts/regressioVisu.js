@@ -25,7 +25,7 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
                 selite: "Piirrä neliövirheet"
             }
         ];
-
+        this.filtered = this.data;
         this.xname = "raha";
         this.yname = "joku";
         this.modelDegree = 1;
@@ -42,14 +42,24 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
         this.addKeyListener();
     };  
     
-    RegressioVisu.prototype.update = function() {
+    RegressioVisu.prototype.update = function(shouldPlotPath) {
         this.pallovisu.update();
-        this.paramspaceVisu.update();
+        this.paramspaceVisu.update(shouldPlotPath);
+    }
+
+    RegressioVisu.prototype.betaPath = function() {
+        return this.model.betaPath.map( function(d) {
+            var vals = d.values;
+            return {
+                b0: vals[0][0],
+                b1: vals[1][0]
+            };
+        });
     }
 
     RegressioVisu.prototype.optimalButtonCallback = function() {
-        this.updateModel();
-        this.update(); 
+        this.updateModel(this.model.beta);
+        this.update(true); 
     };
 
     RegressioVisu.prototype.emptyButtonCallback = function() {
@@ -58,9 +68,9 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
         this.update(); 
     }
 
-    RegressioVisu.prototype.updateModel = function() {
+    RegressioVisu.prototype.updateModel = function(startingPoint) {
         var self = this;
-        self.model = new lm.Ols(self.filtered, self.yname, self.xname, 1);
+        self.model = new lm.Ols(self.filtered, self.yname, self.xname, 1, startingPoint);
     }
 
     RegressioVisu.prototype.btnCallback = function(value, checked) {
@@ -109,7 +119,7 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
     }
 
     RegressioVisu.prototype.removeDatapoint = function(i) {
-        self.filtered = self.filtered.slice(0,i).concat(self.filtered.slice(i+1,self.filtered.length));
+        this.filtered = this.filtered.slice(0,i).concat(this.filtered.slice(i+1,this.filtered.length));
     }
 
     RegressioVisu.prototype.addKeyListener = function() {
@@ -130,6 +140,15 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
                     self.update();
                 }
             })
+    }
+
+    
+    RegressioVisu.prototype.gradient = function() {
+        var vals = this.model.derivative(this.model.beta).values;
+        return {
+            b0: vals[0][0], 
+            b1: vals[1][0]
+        };
     }
 
     return {

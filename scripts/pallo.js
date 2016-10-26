@@ -1,4 +1,4 @@
-define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
+define(["d3", "graphics", "lm", "visuGenerics"], function(d3, graphics, lm, visuGenerics) {
     var Pallo = function(elementId, xname, yname, visu) {
         var self = this;
         this.xname = xname;
@@ -43,13 +43,11 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
             .orient("bottom")
             .outerTickSize(0)
             .tickPadding(10)
-            .innerTickSize(-self.svgObject.height);
 
         self.yAxis = d3.svg.axis().scale(self.yAxisScale)
             .orient("left")
             .tickPadding(10)
             .outerTickSize(0)
-            .innerTickSize(-self.svgObject.width);
 
         self.drawnXAxis = self.svgObject.svgContainer
             .append("g")
@@ -202,18 +200,7 @@ define(["d3", "graphics", "lm"], function(d3, graphics, lm) {
 
         }
 
-        Pallo.prototype.drawBty = function() {
-            var self = this;
-            self.bty = self.svgObject.svgContainer
-                .append("rect")
-                    .attr("x",0)
-                    .attr("y",0)
-                    .attr("width", self.svgObject.width)
-                    .attr("height", self.svgObject.height)
-                    .style("stroke","black")
-                    .style("stroke-width",1)
-                    .style("fill","none")
-        }
+        Pallo.prototype.drawBty = visuGenerics.drawBty;
 
         Pallo.prototype.update = function() {
             var self = this;
