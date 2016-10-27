@@ -1,6 +1,6 @@
 define(["d3", "graphics", "lm", "visuGenerics"], function(d3, graphics, lm, visuGenerics) {
     var Pallo = function(elementId, xname, yname, visu) {
-        var self = this;
+        visuGenerics.Plot.call(this);
         this.xname = xname;
         this.yname = yname;
         this.elementId = elementId;
@@ -109,7 +109,6 @@ define(["d3", "graphics", "lm", "visuGenerics"], function(d3, graphics, lm, visu
                 newobs[self.xname] = x;
                 newobs[self.yname] = y;
                 self.visu.addDatapoint(newobs);
-                self.update();
             })
     }
 
@@ -195,7 +194,6 @@ define(["d3", "graphics", "lm", "visuGenerics"], function(d3, graphics, lm, visu
                     if (self.visu.getFiltered().length == 2)
                         return;
                     self.visu.removeDatapoint(i);
-                    self.update();
                 })
 
         }

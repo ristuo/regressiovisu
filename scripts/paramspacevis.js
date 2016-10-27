@@ -1,6 +1,7 @@
 define(["d3", "graphics", "visuGenerics"], function(d3, graphics, visuGenerics) {
 
     var ParamspaceVisu = function(elementId, visu) {
+        visuGenerics.Plot.call(this);
         this.elementId = elementId;
         this.visu = visu;
         this.svgObject;
@@ -47,6 +48,7 @@ define(["d3", "graphics", "visuGenerics"], function(d3, graphics, visuGenerics) 
         this.drawBty();
         if ( typeof shouldPlotPath != 'undefined' && shouldPlotPath) 
             this.drawPath();
+        this.drawData();
     }
     
     ParamspaceVisu.prototype.drawPath = function() {
@@ -78,11 +80,6 @@ define(["d3", "graphics", "visuGenerics"], function(d3, graphics, visuGenerics) 
             .style("fill","none")
     }
 
-    ParamspaceVisu.prototype.d3line = d3.svg.line()
-        .x(function(d) { return this.xAxisScale(d.b0) })
-        .y(function(d) { return this.yAxisScale(d.b1) })
-        .interpolate("linear")
-
     ParamspaceVisu.prototype.drawGradient = function() {
         var self = this;
         var start = this.visu.parameters()
@@ -109,6 +106,25 @@ define(["d3", "graphics", "visuGenerics"], function(d3, graphics, visuGenerics) 
                 .attr("cx",this.xAxisScale(params.b0))
                 .attr("cy",this.yAxisScale(params.b1))
                 .attr("r",5);
+    }
+
+    ParamspaceVisu.prototype.drawData = function() {
+        var self = this;
+        var gradientgroup = this.svgObject.svgContainer
+            .append("g")
+                .attr("class","regressionline")       
+
+        var points = this.visu.filtered.map( function(d) {
+            return {
+                a: d[self.visu.yname]/d[self.visu.xname],
+                b: -(1/d[self.visu.xname])
+            };
+        }); 
+        points.forEach( function(d) {
+            var linedata = self.abline(d.a, d.b);
+            gradientgroup.append("path")
+                .attr("d", self.d3line(linedata))
+        })
     }
 
     ParamspaceVisu.prototype.update = function(shouldPlotPath) {
@@ -140,8 +156,6 @@ define(["d3", "graphics", "visuGenerics"], function(d3, graphics, visuGenerics) 
             .attr("transform","translate(0,0)")
             .call(this.yAxis)
     }
-
-    ParamspaceVisu.prototype.drawBty = visuGenerics.drawBty;
 
     return {
         ParamspaceVisu: ParamspaceVisu

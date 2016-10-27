@@ -34,6 +34,7 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
         this.buttonHandler = new button.ButtonHandler(palloElementId, self.btns, self);
         this.pallovisu = new pallo.Pallo(palloElementId, "raha", "joku", this);
         this.paramspaceVisu = new paramspacevis.ParamspaceVisu(paramElementId, this);
+        console.log(this.pallovisu);
     }
     RegressioVisu.prototype.init = function() {
         this.buttonHandler.draw();
@@ -116,10 +117,12 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
 
     RegressioVisu.prototype.addDatapoint = function(d) {
         this.filtered = this.filtered.concat([d]);
+        this.update();
     }
 
     RegressioVisu.prototype.removeDatapoint = function(i) {
         this.filtered = this.filtered.slice(0,i).concat(this.filtered.slice(i+1,this.filtered.length));
+        this.update();
     }
 
     RegressioVisu.prototype.addKeyListener = function() {
