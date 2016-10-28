@@ -33,12 +33,20 @@ define(["linalg", "optimize"], function(linalg, optimize) {
         return dm.multiply(self.beta).values[0][0];
     }
 
+    Ols.prototype.targetNumeric = function(a) {
+        var beta = new linalg.RowMatrix([
+            [a[0]],[a[1]]
+        ]);
+        return this.target(beta);
+    }
+
     Ols.prototype.predictNumeric = function(x) {
         var self = this;
         var d = {};
         d[self.xname] = x;
         return self.predict(d);
     }
+
 
     Ols.prototype.incrementBeta1 = function(x) {
         var self = this;

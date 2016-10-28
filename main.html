@@ -10,19 +10,29 @@
         <div class="navbar">
         </div>
         <div class="container">
+
             <div class="row">
                 <div class="col-md-6">
                     <h1>PNS-regressio</h1>
                     <p>Kliksuttelemalla voit lisätä tai poistaa datapisteitä, regressiosuora liikkuu aineiston mukana. Lisäksi WASD-näppäimillä voit siirtää suoraa. Optimaalinen suora minimoi virheliöiden yhteenlasketun alan. Vasemmalla on kuvattu parametriavaruus, ja oikealla malli ja aineisto.</p>
                     <p>Analyyttinen ratkaisu erityisesti yksinkertaisen mallin (ts. y = ax + b) tapauksessa on helppo laskea, mutta tässä on harrastuksen vuoksi käytetty hyväksi konveksisuutta ja sovellettu jyrkimmmän laskun menetelmää Barzilai-Borwein-askelkoilla.</p>
+                    <p>Vasemmalla on kuva datasta, johon sovitetaan paras mahdollinen suora. Suoran hyvyyttä mitataan tässä neliöidyillä etyisyyksillä ennustetun y:n arvon ja havaintoon liittyvän todellisen y:n arvon välillä (näillä etäisyyksillä on geometrinen tulkinta kuvassa olevina neliöinä). Oikealla oleva kuva parametriavaruudesta soveltuu vain harrastajille.</p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6">
-                    <div id="param"></div>
+                <div class="col-md-5" id="btns">
+                    
                 </div>
+            </div>
+
+            <div class="row">
+
                 <div class="col-md-6">
                     <div id="pallo"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <div id="param"></div>
                 </div>
             </div>
         </div>

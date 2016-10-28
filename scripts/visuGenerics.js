@@ -13,9 +13,9 @@ define(["d3"], function(d3) {
         }
 
         this.d3line = d3.svg.line()
-                .x(function(d) { return this.xAxisScale(d.b0) })
-                .y(function(d) { return this.yAxisScale(d.b1) })
-                .interpolate("linear");
+            .x(function(d) { return this.xAxisScale(d.b0) })
+            .y(function(d) { return this.yAxisScale(d.b1) })
+            .interpolate("linear");
 
         this.abline = function(a, b) {
             var points = 100;

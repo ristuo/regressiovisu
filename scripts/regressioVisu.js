@@ -31,7 +31,7 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
         this.modelDegree = 1;
         this.filtered = this.data;
         this.model = new lm.Ols(self.filtered, self.yname, self.xname, self.modelDegree);
-        this.buttonHandler = new button.ButtonHandler(palloElementId, self.btns, self);
+        this.buttonHandler = new button.ButtonHandler("#btns", self.btns, self);
         this.pallovisu = new pallo.Pallo(palloElementId, "raha", "joku", this);
         this.paramspaceVisu = new paramspacevis.ParamspaceVisu(paramElementId, this);
         console.log(this.pallovisu);
@@ -93,6 +93,10 @@ define(["button","pallo", "lm", "paramspacevis"], function(button, pallo, lm, pa
             b0: vals[0][0], 
             b1: vals[1][0]
         };
+    }
+
+    RegressioVisu.prototype.target = function(a) {
+        return this.model.targetNumeric(a);
     }
 
     RegressioVisu.prototype.printModel = function() {
